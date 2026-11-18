@@ -182,6 +182,7 @@ button,input,select,textarea{font:inherit;color:inherit}
 
 .toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--fg);color:var(--bg);padding:10px 16px;border-radius:12px;font-size:14px;z-index:20;box-shadow:var(--shadow);max-width:calc(100% - 32px)}
 
+@media (min-width:701px){body.panel-open .board{margin-right:min(460px,100%)}}
 @media (max-width:700px){
   .canvas{display:grid;grid-template-columns:repeat(auto-fill,minmax(158px,1fr));gap:12px;padding:16px max(16px,env(safe-area-inset-right,0px)) 32px max(16px,env(safe-area-inset-left,0px));box-sizing:border-box;align-content:start}
   .tile{position:static;width:auto}
@@ -469,6 +470,7 @@ function renderBoard(){
     const v = view(id), el = tileEls.get(id);
     const sx = v.x || 0, sy = v.y || 0, w = el.offsetWidth, h = el.offsetHeight;
     let x = sx, y = sy, wrapped = false;
+    if (!S.arrange && x + w > limit) { x = Math.max(16, limit - w); wrapped = true; }
     if (S.dragging === id) { x = parseFloat(el.style.left) || sx; y = parseFloat(el.style.top) || sy; }
     else if (!S.arrange) {
       for (let k = 0; k < 300; k++) {
@@ -550,10 +552,11 @@ async function resolveNames(ids){
   if (!S.user || !S.user.profiles) { fill(null); return; }
   try { fill(await S.user.profiles(ids)); } catch { fill(null); }
 }
-function openPanel(id){ S.openId = id; S.confirm = null; render(); }
+function openPanel(id){ S.openId = id; S.confirm = null; render();
+  const el = tileEls.get(id); if (el && el.scrollIntoView) setTimeout(() => el.scrollIntoView({block:'nearest', inline:'nearest', behavior:'smooth'}), 260); }
 function closePanel(){ S.openId = null; S.confirm = null; render(); }
 
-function render(){ renderBoard(); renderStats(); renderPanel(); setSync(); }
+function render(){ document.body.classList.toggle('panel-open', !!S.openId && !!view(S.openId)); renderBoard(); renderStats(); renderPanel(); setSync(); }
 
 /* ---------- events ---------- */
 panel.addEventListener('input', e => {
