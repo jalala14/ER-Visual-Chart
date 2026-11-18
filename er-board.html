@@ -84,9 +84,10 @@ button,input,select,textarea{font:inherit;color:inherit}
 .tile.sel{border-color:var(--fg);outline:3px solid var(--accent);outline-offset:2px}
 .tile.empty{background:color-mix(in srgb,var(--surface) 70%,transparent);color:var(--muted);border:2px dashed var(--line);box-shadow:none}
 .tile.empty:hover{border-color:var(--accent);color:var(--fg)}
-.tile{touch-action:manipulation}
+.tile{touch-action:manipulation;-webkit-touch-callout:none}
 .arranging .tile{cursor:grab;touch-action:none}
-.arranging .tile.dragging{transition:none;cursor:grabbing;transform:scale(calc(var(--s,1) * 1.03));box-shadow:0 18px 40px rgb(0 0 0 / .3);z-index:4}
+.tile.lift{transform:scale(calc(var(--s,1) * 1.03));box-shadow:0 14px 34px rgb(0 0 0 / .28)}
+.tile.dragging{transition:none;cursor:grabbing;transform:scale(calc(var(--s,1) * 1.03));box-shadow:0 18px 40px rgb(0 0 0 / .3);z-index:4}
 .t-head{display:flex;align-items:center;justify-content:space-between;gap:8px;min-width:0}
 .t-bed{font-family:var(--f-display);font-weight:700;font-size:24px;line-height:1;letter-spacing:.02em;text-transform:uppercase;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0}
 .dchip{flex:none;font-family:var(--f-display);font-weight:700;font-size:14px;letter-spacing:.06em;text-transform:uppercase;padding:3px 8px;border-radius:6px;color:#fff;background:var(--c-mgh)}
@@ -238,7 +239,6 @@ button,input,select,textarea{font:inherit;color:inherit}
   .tile{position:static;width:auto}
   .tile.expanded{grid-column:1/-1;width:auto}
   .t-bed{font-size:21px}
-  #b-arrange{display:none}
   #b-dlist span.lbl{display:none}
   .sizer{display:none}
   .tile{transform:none}
@@ -267,9 +267,6 @@ button,input,select,textarea{font:inherit;color:inherit}
     <button class="btn" id="b-dlist" type="button" aria-label="Discharge list">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6h11M9 12h11M9 18h11M4 6h.01M4 12h.01M4 18h.01"/></svg>
       <span class="lbl">Discharge list</span><b class="badge" id="dl-count" title="Patients who left today">0</b></button>
-    <button class="btn" id="b-arrange" aria-pressed="false" type="button">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 2v20M2 12h20M12 2l-3 3M12 2l3 3M12 22l-3-3M12 22l3-3M2 12l3-3M2 12l3 3M22 12l-3-3M22 12l-3 3"/></svg>
-      <span>Move beds</span></button>
     <button class="btn primary" id="b-add" type="button" aria-label="Add bed">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>
       <span>Add bed</span></button>
@@ -535,7 +532,7 @@ function renderBoard(){
     const st = document.createElement('div'); st.className = 'state';
     if (S.mode === 'connecting') st.innerHTML = `<div><h2>Opening the board</h2><p>Loading beds…</p></div>`;
     else if (S.mode === 'error') st.innerHTML = `<div><h2>Can't reach the board</h2><p>The shared beds didn't load. Check your connection, then reopen this page.</p></div>`;
-    else st.innerHTML = `<div><h2>No beds yet</h2><p>Add a bed for each spot in your ER. You can rename them and drag them into your floor layout.</p>${S.canWrite ? '<button class="btn primary" type="button" data-act="add">Add the first bed</button>' : ''}</div>`;
+    else st.innerHTML = `<div><h2>No beds yet</h2><p>Add a bed for each spot in your ER. You can rename them and drag them anywhere to match your floor.</p>${S.canWrite ? '<button class="btn primary" type="button" data-act="add">Add the first bed</button>' : ''}</div>`;
     canvas.appendChild(st);
     return;
   }
@@ -591,9 +588,6 @@ function renderStats(){
   Object.entries(d).forEach(([k, n]) => { if (n) parts.push(`<span class="stat"><b>${n}</b> ${k}</span>`); });
   $('#stats').innerHTML = parts.join('');
   $('#b-add').disabled = !S.canWrite || S.mode === 'connecting' || S.mode === 'error';
-  $('#b-arrange').disabled = !S.canWrite || !ids.length;
-  $('#b-arrange').setAttribute('aria-pressed', String(S.arrange));
-  $('#b-arrange span').textContent = S.arrange ? 'Done' : 'Move beds';
 }
 
 /* ---------- drawer ---------- */
@@ -839,7 +833,6 @@ $('#f-size').addEventListener('input', e => { SC = Number(e.target.value) / 100;
 $('#f-size').addEventListener('change', () => { $('#canvas').classList.remove('resizing'); try { localStorage.setItem('er-size', Math.round(SC * 100)); } catch {} });
 applySize();
 $('#canvas').addEventListener('click', e => { if (e.target.closest('[data-act="add"]')) addBed(); });
-$('#b-arrange').addEventListener('click', () => { S.arrange = !S.arrange; if (S.arrange) S.openId = null; render(); });
 
 function nextName(){ const names = new Set(allIds().map(id => String(view(id).name).toLowerCase())); let n = allIds().length + 1; while (names.has('bed ' + n)) n++; return 'Bed ' + n; }
 function freeSpot(){
@@ -859,28 +852,47 @@ function addBed(){
 }
 
 /* tap to open / drag to arrange */
-let drag = null;
+/* Drag a bed to move it. Mouse/pen: press and drag. Touch: hold for a moment, then drag (a quick swipe still scrolls the board). */
+let drag = null, pend = null, suppressClick = false;
+const canDrag = () => S.canWrite && !matchMedia('(max-width:700px)').matches;
+function cancelPend(){ if (!pend) return; clearTimeout(pend.timer); pend.el.classList.remove('lift'); pend = null; }
 $('#canvas').addEventListener('pointerdown', e => {
-  const el = e.target.closest('.tile'); if (!el) return;
-  if (!S.arrange || e.target.closest('input, button')) return;
-  e.preventDefault(); el.setPointerCapture(e.pointerId);
-  const v = view(el.dataset.id);
-  drag = {id:el.dataset.id, el, sx:e.clientX, sy:e.clientY, ox:v.x || 0, oy:v.y || 0, moved:false};
-  S.dragging = drag.id; el.classList.add('dragging');
+  const el = e.target.closest('.tile'); if (!el || !canDrag()) return;
+  if (e.button > 0 || e.target.closest('input, button, label')) return;
+  cancelPend();
+  pend = {el, id:el.dataset.id, pid:e.pointerId, sx:e.clientX, sy:e.clientY, touch:e.pointerType === 'touch', ready:e.pointerType !== 'touch', timer:null};
+  if (pend.touch) pend.timer = setTimeout(() => { if (pend) { pend.ready = true; pend.el.classList.add('lift'); try { navigator.vibrate && navigator.vibrate(10); } catch {} } }, 350);
 });
 $('#canvas').addEventListener('pointermove', e => {
-  if (!drag) return;
-  const dx = e.clientX - drag.sx, dy = e.clientY - drag.sy;
-  if (Math.abs(dx) + Math.abs(dy) > 4) drag.moved = true;
-  const k = scale(); drag.x = Math.max(0, drag.ox + dx / k); drag.y = Math.max(0, drag.oy + dy / k);
-  drag.el.style.left = drag.x * k + 'px'; drag.el.style.top = drag.y * k + 'px';
+  if (drag) {
+    const k = scale(), dx = e.clientX - drag.sx, dy = e.clientY - drag.sy;
+    drag.x = Math.max(0, drag.ox + dx / k); drag.y = Math.max(0, drag.oy + dy / k);
+    drag.el.style.left = drag.x * k + 'px'; drag.el.style.top = drag.y * k + 'px';
+    return;
+  }
+  if (!pend || e.pointerId !== pend.pid) return;
+  const dist = Math.hypot(e.clientX - pend.sx, e.clientY - pend.sy);
+  if (!pend.ready) { if (dist > 8) cancelPend(); return; }
+  if (dist < 5) return;
+  const el = pend.el, k = scale();
+  try { el.setPointerCapture(e.pointerId); } catch {}
+  clearTimeout(tapTimer); tapTimer = tapId = null;
+  drag = {id:pend.id, el, sx:pend.sx, sy:pend.sy, ox:(parseFloat(el.style.left) || 0) / k, oy:(parseFloat(el.style.top) || 0) / k};
+  drag.x = drag.ox; drag.y = drag.oy;
+  el.classList.remove('lift'); el.classList.add('dragging'); S.dragging = drag.id;
+  clearTimeout(pend.timer); pend = null;
 });
 function endDrag(){
-  if (!drag) return; const d = drag; drag = null; S.dragging = null; d.el.classList.remove('dragging');
-  if (d.moved) { const x = Math.round(d.x / 10) * 10, y = Math.round(d.y / 10) * 10; patch(d.id, {x, y}, 0); } else render();
+  if (pend) { if (pend.touch && pend.ready) suppressClick = true; cancelPend(); }
+  if (!drag) { if (suppressClick) setTimeout(() => suppressClick = false, 60); return; }
+  const d = drag; drag = null; S.dragging = null; d.el.classList.remove('dragging');
+  suppressClick = true; setTimeout(() => suppressClick = false, 60);
+  const x = Math.round(d.x / 10) * 10, y = Math.round(d.y / 10) * 10;
+  patch(d.id, {x, y}, 0);
 }
 $('#canvas').addEventListener('pointerup', endDrag);
 $('#canvas').addEventListener('pointercancel', endDrag);
+$('#canvas').addEventListener('touchmove', e => { if (drag || (pend && pend.ready)) e.preventDefault(); }, {passive:false});
 function tileTap(el, target){
   const id = el.dataset.id, v = view(id); if (!v) return;
   const act = target.closest('[data-act]');
@@ -893,6 +905,7 @@ function tileTap(el, target){
 /* One tap expands or shrinks a card; a quick second tap on the same card opens the edit panel instead. */
 let tapTimer = null, tapId = null;
 $('#canvas').addEventListener('click', e => {
+  if (suppressClick) { suppressClick = false; return; }
   const el = e.target.closest('.tile'); if (!el || S.arrange) return;
   const id = el.dataset.id, v = view(id), tgt = e.target;
   if (tgt.closest('input, label')) return;
