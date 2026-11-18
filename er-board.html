@@ -99,21 +99,18 @@ button,input,select,textarea{font:inherit;color:inherit}
 .pill.ok{background:var(--pill-ok-bg);color:var(--pill-ok-fg)}
 .pill.none{background:var(--tile-line);color:var(--tile-fg)}
 .los{font-family:var(--f-mono);color:var(--tile-muted);white-space:nowrap;font-variant-numeric:tabular-nums}
-.tile.expanded{width:400px;z-index:3;cursor:default;gap:10px;padding:14px 16px 14px}
-.tile.expanded:hover{background:var(--tile)}
+.tile.expanded{width:400px;z-index:3;cursor:pointer;gap:10px;padding:14px 16px 14px}
+.tile.expanded:hover{background:var(--tile-hi)}
 .tile.expanded .t-head{cursor:pointer}
 .tile.expanded > .los{font-size:12.5px}
 .tile.expanded .t-cc{-webkit-line-clamp:unset;display:block;color:var(--tile-fg)}
-.x-col{flex:none;border:0;background:rgb(255 255 255 / .14);color:var(--tile-fg);width:30px;height:30px;border-radius:8px;cursor:pointer;display:grid;place-items:center}
-.x-col:hover{background:rgb(255 255 255 / .26)}
-.x-col svg{width:16px;height:16px}
 .x-sec{border-top:1px solid var(--tile-line);padding-top:9px;display:flex;flex-direction:column;gap:6px}
 .x-sec h5{margin:0;font-family:var(--f-display);font-weight:600;font-size:13px;letter-spacing:.12em;text-transform:uppercase;color:var(--tile-muted);display:flex;justify-content:space-between;gap:8px}
 .x-sec h5 small{font-family:var(--f-body);letter-spacing:0;text-transform:none;font-weight:400;font-size:12px}
 .x-list{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:3px}
 .x-list li{display:grid;grid-template-columns:auto 1fr;gap:9px;align-items:start;font-size:14.5px;padding:4px 6px 4px 2px;border-radius:8px}
 .x-list li.done .xt{text-decoration:line-through;color:var(--tile-muted)}
-.xcb{appearance:none;-webkit-appearance:none;width:22px;height:22px;margin:0;border:2px solid var(--tile-fg);border-radius:6px;background:transparent;cursor:pointer;display:grid;place-items:center}
+.xcb{appearance:none;-webkit-appearance:none;width:24px;height:24px;margin:0;border:2px solid var(--tile-fg);border-radius:6px;background:transparent;cursor:pointer;display:grid;place-items:center}
 .xcb:checked{background:var(--pill-ok-bg);border-color:var(--pill-ok-bg)}
 .xcb:checked::after{content:"";width:5px;height:10px;border:solid var(--pill-ok-fg);border-width:0 2.5px 2.5px 0;transform:translateY(-1px) rotate(45deg)}
 .xcb:disabled{cursor:default;opacity:.8}
@@ -421,7 +418,7 @@ function xList(key, list){
 function expandedHtml(v, {p, vt, dx, tx, meds, pill, agesex}){
   const cnt = l => l.length ? `<small>${l.filter(i => i.d).length} of ${l.length} done</small>` : '';
   const vit = [['BP',vt.bp],['HR',vt.hr],['RR',vt.rr],['Temp',vt.temp],['SpO₂',vt.spo2 ? vt.spo2 + '%' : '']].filter(x => x[1]);
-  return `<div class="t-head" data-act="collapse"><span class="t-bed">${esc(v.name || 'Bed')}</span><span style="display:flex;gap:8px;align-items:center">${v.dispo ? `<span class="dchip ${esc(v.dispo)}">${esc(v.dispo)}</span>` : ''}<button class="x-col" type="button" data-act="collapse" aria-label="Collapse ${esc(v.name || 'bed')}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 15l6-6 6 6"/></svg></button></span></div>
+  return `<div class="t-head"><span class="t-bed">${esc(v.name || 'Bed')}</span>${v.dispo ? `<span class="dchip ${esc(v.dispo)}">${esc(v.dispo)}</span>` : ''}</div>
     <div class="t-pt">${esc(p.name || 'Unnamed')}${agesex ? ` <span>${esc(agesex)}</span>` : ''}</div>
     ${p.cc ? `<div class="t-cc"><span style="color:var(--tile-muted)">CC:</span> ${esc(p.cc)}</div>` : ''}
     ${p.arrivedAt ? `<div class="los">Arrived ${esc(fmtTime(p.arrivedAt))} · in ER ${fmtLos(p.arrivedAt)}</div>` : ''}
@@ -663,10 +660,9 @@ function tileTap(el, target){
   const id = el.dataset.id, v = view(id); if (!v) return;
   const act = target.closest('[data-act]');
   if (act && act.dataset.act === 'edit') return openPanel(id);
-  if (target.closest('input, label, .x-list')) return;
+  if (target.closest('input, label')) return;
   if (!hasPatient(v)) return openPanel(id);
-  if (S.expanded.has(id)) { if (!act || act.dataset.act !== 'collapse') return; S.expanded.delete(id); }
-  else S.expanded.add(id);
+  if (S.expanded.has(id)) S.expanded.delete(id); else S.expanded.add(id);
   saveExpanded(); renderBoard();
 }
 $('#canvas').addEventListener('click', e => { const el = e.target.closest('.tile'); if (el && !S.arrange) tileTap(el, e.target); });
