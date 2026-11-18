@@ -104,11 +104,23 @@ button,input,select,textarea{font:inherit;color:inherit}
 
 /* Drawer */
 .scrim{position:fixed;inset:0;background:rgb(5 12 18 / .35);z-index:8}
-.panel{position:fixed;top:0;right:0;bottom:0;width:min(460px,100%);background:var(--surface);border-left:1px solid var(--line);box-shadow:var(--shadow);z-index:9;display:flex;flex-direction:column;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);padding-right:env(safe-area-inset-right,0px)}
-.p-head{display:flex;align-items:center;gap:10px;padding:14px 18px;border-bottom:1px solid var(--line)}
-.bed-input{flex:1;min-width:0;font-family:var(--f-display);font-weight:700;font-size:28px;text-transform:uppercase;letter-spacing:.02em;border:1px solid transparent;border-radius:8px;padding:2px 6px;margin-left:-6px;background:transparent}
-.bed-input:hover,.bed-input:focus{border-color:var(--line);background:var(--surface-2)}
-.p-body{flex:1;overflow:auto;padding:4px 18px 28px;display:flex;flex-direction:column}
+.panel{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);width:min(1100px,calc(100% - 32px));height:min(900px,calc(100% - 32px - env(safe-area-inset-top,0px) - env(safe-area-inset-bottom,0px)));background:var(--surface);border:1px solid var(--line);border-radius:22px;box-shadow:0 24px 70px rgb(0 0 0 / .35);z-index:9;display:flex;flex-direction:column;overflow:hidden}
+.p-head{display:flex;align-items:center;gap:12px 16px;flex-wrap:wrap;padding:14px 20px;background:var(--tile);color:var(--tile-fg)}
+.bed-input{flex:0 1 220px;min-width:0;font-family:var(--f-display);font-weight:700;font-size:32px;text-transform:uppercase;letter-spacing:.02em;border:1px solid transparent;border-radius:8px;padding:2px 6px;margin-left:-6px;background:transparent;color:var(--tile-fg)}
+.bed-input:hover,.bed-input:focus{border-color:var(--tile-line);background:rgb(255 255 255 / .1)}
+.p-sum{flex:1;min-width:0;display:flex;flex-wrap:wrap;align-items:center;gap:6px 14px;font-size:15px}
+.p-sum b{font-size:18px}
+.p-sum .m{color:var(--tile-muted);font-family:var(--f-mono);font-size:13px}
+.p-head #p-close{background:rgb(255 255 255 / .14);border-color:transparent;color:var(--tile-fg)}
+.p-head #p-close:hover{background:rgb(255 255 255 / .24)}
+.p-body{flex:1;overflow:auto;padding:4px 22px 24px;display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:0 36px;align-items:start}
+.col{display:flex;flex-direction:column;min-width:0}
+.col .sec:last-child{border-bottom:0}
+#wipe-sec{grid-column:1/-1;border-top:1px solid var(--line);border-bottom:0}
+@media (max-width:860px){.p-body{grid-template-columns:minmax(0,1fr)}.col .sec:last-child{border-bottom:1px solid var(--line)}#wipe-sec{border-top:0}}
+.tedit{border:0;border-bottom:1px dashed currentColor;background:transparent;color:inherit;font-family:var(--f-mono);font-size:12px;padding:0 1px;border-radius:0;cursor:pointer}
+.tedit:hover{background:var(--surface)}
+.tedit:disabled{border-bottom-color:transparent;cursor:default}
 .sec{padding:16px 0;border-bottom:1px solid var(--line);display:flex;flex-direction:column;gap:10px}
 .sec:last-child{border-bottom:0}
 .sec h3{margin:0;font-family:var(--f-display);font-weight:600;font-size:15px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);display:flex;justify-content:space-between;align-items:baseline;gap:8px}
@@ -134,7 +146,7 @@ button,input,select,textarea{font:inherit;color:inherit}
 .cb:checked::after{content:"";width:6px;height:12px;border:solid var(--surface);border-width:0 3px 3px 0;transform:translateY(-1px) rotate(45deg)}
 .cb:disabled{cursor:not-allowed;opacity:.7}
 .ct{min-width:0;overflow-wrap:anywhere}
-.cby{display:block;font-size:11.5px;color:var(--ok);margin-top:1px}
+.cby{display:flex;flex-wrap:wrap;align-items:center;gap:4px;font-size:11.5px;color:var(--ok);margin-top:2px}
 .x{border:0;background:transparent;color:var(--muted);cursor:pointer;width:30px;height:30px;border-radius:8px;font-size:18px;line-height:1}
 .x:hover{background:var(--danger-bg);color:var(--danger)}
 .empty-list{font-size:13px;color:var(--muted);padding:2px 0}
@@ -165,7 +177,10 @@ button,input,select,textarea{font:inherit;color:inherit}
   #b-arrange{display:none}
   .row{grid-template-columns:1fr 64px 64px}
   .vitals{grid-template-columns:repeat(3,minmax(0,1fr))}
-  .panel{border-left:0}
+  .panel{top:0;left:0;transform:none;width:100%;height:100%;border:0;border-radius:0;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);box-sizing:border-box}
+  .p-body{padding:4px 16px 24px}
+  .bed-input{font-size:26px;flex:1 1 auto}
+  .p-sum{order:3;flex-basis:100%;gap:4px 12px}
   .top{gap:10px}
   .brand{flex:1}
   .stats{order:3;flex-basis:100%}
@@ -196,9 +211,11 @@ button,input,select,textarea{font:inherit;color:inherit}
 <aside class="panel" id="panel" role="dialog" aria-modal="false" aria-labelledby="f-bed" hidden>
   <div class="p-head">
     <input class="bed-input" id="f-bed" data-field="name" aria-label="Bed name" autocomplete="off">
+    <div class="p-sum" id="p-sum"></div>
     <button class="btn" id="p-close" type="button">Close</button>
   </div>
   <div class="p-body">
+   <div class="col">
     <section class="sec">
       <h3>Patient <small id="los-text"></small></h3>
       <div class="row">
@@ -211,7 +228,7 @@ button,input,select,textarea{font:inherit;color:inherit}
     </section>
 
     <section class="sec">
-      <h3>Vital signs <small id="vit-meta"></small></h3>
+      <h3>Vital signs <small id="vit-meta" class="inline"></small></h3>
       <div class="vitals">
         <label class="fld">BP<input id="f-bp" data-field="vitals.bp" inputmode="numeric" placeholder="120/80" autocomplete="off"></label>
         <label class="fld">HR<input id="f-hr" data-field="vitals.hr" inputmode="numeric" placeholder="bpm" autocomplete="off"></label>
@@ -219,20 +236,6 @@ button,input,select,textarea{font:inherit;color:inherit}
         <label class="fld">Temp<input id="f-temp" data-field="vitals.temp" inputmode="decimal" placeholder="°C" autocomplete="off"></label>
         <label class="fld">SpO₂<input id="f-spo2" data-field="vitals.spo2" inputmode="numeric" placeholder="%" autocomplete="off"></label>
       </div>
-    </section>
-
-    <section class="sec" data-list="dx">
-      <h3>Diagnostics <small class="cnt"></small></h3>
-      <ul class="checks"></ul>
-      <form class="add"><input id="a-dx" placeholder="Add a test, e.g. CBC" autocomplete="off" aria-label="Add diagnostic"><button class="btn" type="submit">Add</button></form>
-      <div class="chips"></div>
-    </section>
-
-    <section class="sec" data-list="tx">
-      <h3>Therapeutics <small class="cnt"></small></h3>
-      <ul class="checks"></ul>
-      <form class="add"><input id="a-tx" placeholder="Add an order, e.g. Paracetamol 1 g IV" autocomplete="off" aria-label="Add therapeutic"><button class="btn" type="submit">Add</button></form>
-      <div class="chips"></div>
     </section>
 
     <section class="sec">
@@ -256,6 +259,23 @@ button,input,select,textarea{font:inherit;color:inherit}
       <label class="fld"><span class="hint">Anything the team should know</span><textarea id="f-notes" data-field="notes" rows="3"></textarea></label>
     </section>
 
+   </div>
+   <div class="col">
+    <section class="sec" data-list="dx">
+      <h3>Diagnostics <small class="cnt"></small></h3>
+      <ul class="checks"></ul>
+      <form class="add"><input id="a-dx" placeholder="Add a test, e.g. CBC" autocomplete="off" aria-label="Add diagnostic"><button class="btn" type="submit">Add</button></form>
+      <div class="chips"></div>
+    </section>
+
+    <section class="sec" data-list="tx">
+      <h3>Therapeutics <small class="cnt"></small></h3>
+      <ul class="checks"></ul>
+      <form class="add"><input id="a-tx" placeholder="Add an order, e.g. Paracetamol 1 g IV" autocomplete="off" aria-label="Add therapeutic"><button class="btn" type="submit">Add</button></form>
+      <div class="chips"></div>
+    </section>
+
+   </div>
     <section class="sec" id="wipe-sec">
       <div class="actions">
         <button class="btn" id="b-clear" type="button">Patient left: clear bed</button>
@@ -281,6 +301,8 @@ const getPath = (o, p) => p.split('.').reduce((a, k) => a == null ? a : a[k], o)
 function pathPatch(p, val){ const ks = p.split('.'); const out = {}; let c = out; ks.forEach((k, i) => { if (i === ks.length - 1) c[k] = val; else c = c[k] = {}; }); return out; }
 const sleep = ms => new Promise(r => setTimeout(r, ms));
 const uid = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
+const hhmm = ms => { const t = new Date(ms); return `${String(t.getHours()).padStart(2,'0')}:${String(t.getMinutes()).padStart(2,'0')}`; };
+function timeToMs(val, baseMs){ const [h, m] = val.split(':').map(Number); const d = new Date(baseMs || Date.now()); d.setHours(h, m, 0, 0); if (d.getTime() > Date.now() + 60000) d.setDate(d.getDate() - 1); return d.getTime(); }
 const fmtTime = ms => ms ? new Date(ms).toLocaleTimeString([], {hour:'numeric', minute:'2-digit'}) : '';
 function fmtLos(ms){ if (!ms) return ''; const m = Math.max(0, Math.floor((Date.now() - ms) / 60000)); const h = Math.floor(m / 60); return h ? `${h}h ${String(m % 60).padStart(2,'0')}m` : `${m}m`; }
 const use = n => (window.claude && window.claude.use) ? Promise.resolve(window.claude.use(n)).catch(() => null) : Promise.resolve(null);
@@ -434,7 +456,7 @@ function renderPanel(){
   if (!S.openId) { panel.hidden = true; $('#scrim').hidden = true; return; }
   const v = view(S.openId);
   if (!v) { closePanel(); toast('That bed was removed.'); return; }
-  panel.hidden = false; $('#scrim').hidden = !matchMedia('(max-width:700px)').matches;
+  panel.hidden = false; $('#scrim').hidden = false;
   panel.classList.toggle('ro', !S.canWrite);
   panel.querySelectorAll('input,select,textarea,button:not(#p-close)').forEach(el => { if (!el.closest('#confirm')) el.disabled = !S.canWrite; });
   panel.querySelectorAll('[data-field]').forEach(el => {
@@ -448,7 +470,10 @@ function renderPanel(){
   $('#arr-hint').innerHTML = p.arrivedAt ? `In ER <b>${fmtLos(p.arrivedAt)}</b>` : 'Set automatically when you enter the patient';
   $('#los-text').textContent = '';
   const vt = v.vitals || {};
-  $('#vit-meta').innerHTML = v.vitalsAt ? `Taken ${esc(fmtTime(v.vitalsAt))}${v.vitalsBy ? ` · <span data-uid="${esc(v.vitalsBy)}"></span>` : ''}` : '';
+  const vm = $('#vit-meta');
+  if (!vm.contains(document.activeElement)) vm.innerHTML = v.vitalsAt ? `Taken <input type="time" class="tedit" id="f-vt" value="${hhmm(v.vitalsAt)}" aria-label="Time vitals were taken" ${S.canWrite ? '' : 'disabled'}>${v.vitalsBy ? ` · <span data-uid="${esc(v.vitalsBy)}"></span>` : ''}` : '';
+  const ag = [p.age, p.sex].filter(Boolean).join(' · ');
+  $('#p-sum').innerHTML = hasPatient(v) ? `<b>${esc(p.name || 'Unnamed')}</b>${ag ? `<span>${esc(ag)}</span>` : ''}${p.cc ? `<span>${esc(p.cc)}</span>` : ''}${p.arrivedAt ? `<span class="m">In ER ${fmtLos(p.arrivedAt)}</span>` : ''}${v.dispo ? `<span class="dchip ${esc(v.dispo)}">${esc(v.dispo)}</span>` : ''}` : '<span class="m">Empty bed</span>';
   const uids = new Set(); if (v.vitalsBy) uids.add(v.vitalsBy);
   ['dx','tx','meds'].forEach(key => {
     const sec = panel.querySelector(`[data-list="${key}"]`);
@@ -456,10 +481,10 @@ function renderPanel(){
     sec.querySelector('.cnt').textContent = list.length ? `${done} of ${list.length} done` : '';
     const html = list.length ? list.map(it => { if (it.by) uids.add(it.by);
       return `<li class="${it.d ? 'done' : ''}"><input type="checkbox" class="cb" data-k="${key}" data-i="${esc(it.id)}" ${it.d ? 'checked' : ''} ${S.canWrite ? '' : 'disabled'} aria-label="Mark ${esc(it.t)} done">
-        <span class="ct">${esc(it.t)}${it.d ? `<span class="cby">Done ${esc(fmtTime(it.at))}${it.by ? ` · <span data-uid="${esc(it.by)}"></span>` : ''}</span>` : ''}</span>
+        <span class="ct">${esc(it.t)}${it.d ? `<span class="cby">Done <input type="time" class="tedit" data-tk="${key}" data-i="${esc(it.id)}" value="${it.at ? hhmm(it.at) : ''}" aria-label="Time ${esc(it.t)} was done" ${S.canWrite ? '' : 'disabled'}>${it.by ? ` · <span data-uid="${esc(it.by)}"></span>` : ''}</span>` : ''}</span>
         ${S.canWrite ? `<button class="x" type="button" data-del="${key}" data-i="${esc(it.id)}" aria-label="Remove ${esc(it.t)}">×</button>` : '<span></span>'}</li>`; }).join('')
       : `<li class="empty-list" style="background:none">Nothing yet.</li>`;
-    const ul = sec.querySelector('.checks'); if (ul._html !== html) { ul.innerHTML = html; ul._html = html; }
+    const ul = sec.querySelector('.checks'); if (ul._html !== html && !ul.contains(document.activeElement)) { ul.innerHTML = html; ul._html = html; }
     const chips = sec.querySelector('.chips');
     if (chips) { const have = new Set(list.map(i => i.t.toLowerCase())); const ch = S.canWrite ? LISTS[key].chips.filter(c => !have.has(c.toLowerCase())).map(c => `<button type="button" class="chip" data-chip="${key}">+ ${esc(c)}</button>`).join('') : '';
       if (chips._html !== ch) { chips.innerHTML = ch; chips._html = ch; } }
@@ -494,10 +519,11 @@ panel.addEventListener('input', e => {
 });
 panel.addEventListener('change', e => {
   const el = e.target; if (!S.openId) return;
-  if (el.id === 'f-arr' && el.value) {
-    const [h, m] = el.value.split(':').map(Number); const d = new Date(); d.setHours(h, m, 0, 0);
-    if (d.getTime() > Date.now() + 60000) d.setDate(d.getDate() - 1);
-    patch(S.openId, {patient:{arrivedAt:d.getTime()}}, 0);
+  if (el.id === 'f-arr' && el.value) patch(S.openId, {patient:{arrivedAt:timeToMs(el.value)}}, 0);
+  if (el.id === 'f-vt' && el.value) patch(S.openId, {vitalsAt:timeToMs(el.value, view(S.openId).vitalsAt)}, 600);
+  if (el.classList.contains('tedit') && el.dataset.tk && el.value) {
+    const it = (view(S.openId)[el.dataset.tk] || {})[el.dataset.i] || {};
+    patch(S.openId, {[el.dataset.tk]:{[el.dataset.i]:{at:timeToMs(el.value, it.at)}}}, 600);
   }
   if (el.classList.contains('cb')) {
     const k = el.dataset.k, i = el.dataset.i;
