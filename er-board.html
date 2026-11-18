@@ -183,8 +183,10 @@ button,input,select,textarea{font:inherit;color:inherit}
 .seg button[data-v="HAMA"][aria-pressed="true"]{background:var(--c-hama)}
 .sub{display:flex;flex-direction:column;gap:8px;padding:12px;border-radius:12px;border:1px solid var(--line)}
 .sub h4{margin:0;font-size:13px}
-.o-Discharged{--oc:var(--c-mgh)} .o-Absconded{--oc:var(--c-absc)} .o-HAMA{--oc:var(--c-hama)} .o-Transferred{--oc:var(--c-transfer)}
-.outs{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+.o-Discharged{--oc:var(--c-mgh)} .o-Admitted{--oc:var(--c-admit)} .o-Absconded{--oc:var(--c-absc)} .o-HAMA{--oc:var(--c-hama)} .o-Transferred{--oc:var(--c-transfer)}
+.outs{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:8px}
+.outs button{grid-column:span 2}
+.outs button:nth-child(n+4){grid-column:span 3}
 .outs button{border:0;border-radius:10px;padding:12px 6px;font-family:var(--f-display);font-weight:700;font-size:17px;letter-spacing:.05em;text-transform:uppercase;color:#fff;background:var(--oc);cursor:pointer}
 .outs button:hover{filter:brightness(1.08)}
 .outs button.sug{box-shadow:0 0 0 3px var(--surface),0 0 0 5px var(--oc)}
@@ -346,9 +348,10 @@ button,input,select,textarea{font:inherit;color:inherit}
       <h3>Patient leaving the ER</h3>
       <div class="outs" id="outs">
         <button type="button" class="o-Discharged" data-out="Discharged">Discharged</button>
-        <button type="button" class="o-Absconded" data-out="Absconded">Absconded</button>
-        <button type="button" class="o-HAMA" data-out="HAMA">HAMA</button>
+        <button type="button" class="o-Admitted" data-out="Admitted">Admitted</button>
         <button type="button" class="o-Transferred" data-out="Transferred">Transferred</button>
+        <button type="button" class="o-HAMA" data-out="HAMA">HAMA</button>
+        <button type="button" class="o-Absconded" data-out="Absconded">Absconded</button>
       </div>
       <div class="leave" id="leave" hidden>
         <p id="leave-text"></p>
@@ -373,6 +376,7 @@ button,input,select,textarea{font:inherit;color:inherit}
     <div class="dl-f" id="dl-f">
       <button type="button" data-f="All" aria-pressed="true">All</button>
       <button type="button" data-f="Discharged" aria-pressed="false">Discharged</button>
+      <button type="button" data-f="Admitted" aria-pressed="false">Admitted</button>
       <button type="button" data-f="Absconded" aria-pressed="false">Absconded</button>
       <button type="button" data-f="HAMA" aria-pressed="false">HAMA</button>
       <button type="button" data-f="Transferred" aria-pressed="false">Transferred</button>
@@ -632,7 +636,7 @@ function renderPanel(){
   panel.querySelectorAll('#dispo button').forEach(b => b.setAttribute('aria-pressed', String(v.dispo === b.dataset.v)));
   $('#dnote-wrap').hidden = !v.dispo; $('#dnote-label').textContent = DNOTE[v.dispo] || 'Notes';
   $('#meds-box').hidden = v.dispo !== 'MGH';
-  const occupied = hasPatient(v), sug = {MGH:'Discharged', Transfer:'Transferred', HAMA:'HAMA'}[v.dispo];
+  const occupied = hasPatient(v), sug = {MGH:'Discharged', Admit:'Admitted', Transfer:'Transferred', HAMA:'HAMA'}[v.dispo];
   panel.querySelectorAll('#outs button').forEach(b => { b.disabled = !S.canWrite || !occupied; b.classList.toggle('sug', occupied && b.dataset.out === sug); });
   $('#b-clear').disabled = !S.canWrite || !occupied;
   const lv = $('#leave'); lv.hidden = !S.leave;
@@ -813,7 +817,7 @@ function renderDList(){
     return [p.name, p.cc, r.bed, r.outcome].some(x => String(x || '').toLowerCase().includes(q));
   }).sort((a, b) => b[1].at - a[1].at);
   let html = '';
-  if (!rows.length) html = `<div class="dl-empty">${S.dis.size ? 'No patients match.' : 'No one has left yet. When a patient leaves, open their bed and press Discharged, Absconded, HAMA or Transferred at the bottom of the panel.'}</div>`;
+  if (!rows.length) html = `<div class="dl-empty">${S.dis.size ? 'No patients match.' : 'No one has left yet. When a patient leaves, open their bed and press Discharged, Admitted, Transferred, HAMA or Absconded at the bottom of the panel.'}</div>`;
   else { let cur = null; rows.forEach(([id, r]) => { const d = dayLabel(r.at); if (d !== cur) { if (cur !== null) html += '</div>'; html += `<div class="dl-day"><h4>${esc(d)}</h4>`; cur = d; } html += recHtml(id, r); }); html += '</div>'; }
   const body = $('#dl-body'); if (body._html !== html) { body.innerHTML = html; body._html = html; }
   resolveNames([...body.querySelectorAll('[data-uid]')].map(e => e.dataset.uid));
