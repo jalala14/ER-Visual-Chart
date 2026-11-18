@@ -11,7 +11,7 @@
   --tile:#2F6E9E; --tile-hi:#3A7DAF; --tile-fg:#F4F9FD; --tile-muted:#C6DAEA; --tile-line:rgb(255 255 255 / .22);
   --warn:#9A5B00; --warn-bg:#FFE6BA; --ok:#16704A; --ok-bg:#D2F0DD; --danger:#B42318; --danger-bg:#FCE3DF;
   --pill-warn-bg:#FFD27A; --pill-warn-fg:#3A2500; --pill-ok-bg:#9FE3BD; --pill-ok-fg:#0B3320;
-  --c-mgh:#1B8553; --c-admit:#6447BF; --c-transfer:#B4570F; --c-hama:#B42318;
+  --c-mgh:#1B8553; --c-admit:#6447BF; --c-transfer:#B4570F; --c-hama:#B42318; --c-absc:#5E6672;
   --shadow:0 1px 2px rgb(15 30 45 / .14), 0 8px 22px rgb(15 30 45 / .12);
   --f-display:"Barlow Condensed","Arial Narrow",system-ui,sans-serif;
   --f-body:"Atkinson Hyperlegible",system-ui,-apple-system,"Segoe UI",sans-serif;
@@ -183,19 +183,61 @@ button,input,select,textarea{font:inherit;color:inherit}
 .seg button[data-v="HAMA"][aria-pressed="true"]{background:var(--c-hama)}
 .sub{display:flex;flex-direction:column;gap:8px;padding:12px;border-radius:12px;border:1px solid var(--line)}
 .sub h4{margin:0;font-size:13px}
+.o-Discharged{--oc:var(--c-mgh)} .o-Absconded{--oc:var(--c-absc)} .o-HAMA{--oc:var(--c-hama)} .o-Transferred{--oc:var(--c-transfer)}
+.outs{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+.outs button{border:0;border-radius:10px;padding:12px 6px;font-family:var(--f-display);font-weight:700;font-size:17px;letter-spacing:.05em;text-transform:uppercase;color:#fff;background:var(--oc);cursor:pointer}
+.outs button:hover{filter:brightness(1.08)}
+.outs button.sug{box-shadow:0 0 0 3px var(--surface),0 0 0 5px var(--oc)}
+.outs button:disabled{opacity:.35;cursor:not-allowed;filter:none}
+.leave{display:flex;flex-direction:column;gap:10px;padding:14px;border-radius:12px;border:2px solid var(--oc);background:var(--surface-2);font-size:14px}
+.leave p{margin:0;color:var(--fg)}
+.btn.o-fill{background:var(--oc);border-color:transparent;color:#fff}
+.minor{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;padding-top:6px}
+.lnk{border:0;background:none;padding:4px 0;color:var(--muted);font-size:13px;text-decoration:underline;text-underline-offset:3px;cursor:pointer}
+.lnk.danger{color:var(--danger)}
+.lnk:disabled{opacity:.4;cursor:not-allowed}
+.badge{font-family:var(--f-mono);font-weight:500;font-size:12px;background:var(--surface-2);border:1px solid var(--line);border-radius:999px;padding:0 7px;line-height:18px}
+.dl-title{flex:1;margin:0;font-family:var(--f-display);font-weight:700;font-size:28px;text-transform:uppercase;letter-spacing:.02em}
+.dl-tools{display:flex;flex-direction:column;gap:8px;padding:12px 18px;border-bottom:1px solid var(--line)}
+.dl-tools input{width:100%;box-sizing:border-box;border:1px solid var(--line);border-radius:9px;padding:8px 10px;background:var(--surface-2);font-size:15px}
+.dl-f{display:flex;flex-wrap:wrap;gap:5px}
+.dl-f button{border:1px solid var(--line);background:var(--surface);border-radius:999px;padding:4px 10px;font-size:12.5px;cursor:pointer;color:var(--muted)}
+.dl-f button[aria-pressed="true"]{background:var(--fg);color:var(--bg);border-color:var(--fg)}
+.dl-day{display:flex;flex-direction:column;gap:8px;padding-top:14px}
+.dl-day h4{margin:0;font-family:var(--f-display);font-weight:600;font-size:14px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+.dl-empty{padding:28px 4px;color:var(--muted);text-align:center}
+.rec{border:1px solid var(--line);border-radius:14px;background:var(--surface);overflow:hidden}
+.rec.open{box-shadow:var(--shadow)}
+.rec-h{appearance:none;border:0;background:transparent;text-align:left;box-sizing:border-box;display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:3px 10px;width:100%;padding:10px 12px;cursor:pointer;color:var(--fg)}
+.rec-h:hover{background:var(--surface-2)}
+.oc{font-family:var(--f-display);font-weight:700;font-size:13px;letter-spacing:.06em;text-transform:uppercase;color:#fff;background:var(--oc);padding:2px 8px;border-radius:6px;align-self:center}
+.rec-name{font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.rec-name span{font-weight:400;color:var(--muted)}
+.rec-time{font-family:var(--f-mono);font-size:12px;color:var(--muted);align-self:center;white-space:nowrap}
+.rec-sub{grid-column:2/4;font-size:13px;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.rec-d{padding:4px 12px 12px;border-top:1px solid var(--line);display:flex;flex-direction:column;gap:4px;font-size:14px}
+.rec-d h5{margin:10px 0 2px;font-family:var(--f-display);font-weight:600;font-size:13px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+.rec-d .mono{font-family:var(--f-mono);font-size:13px}
+.rl{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:2px}
+.rl li{display:grid;grid-template-columns:18px 1fr;gap:6px}
+.rl .ok{color:var(--ok);font-weight:700}
+.rl .no{color:var(--warn);font-weight:700}
+.rl small{color:var(--muted);font-size:12px}
+.rec-act{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
 .confirm{display:flex;flex-direction:column;gap:8px;padding:12px;border-radius:12px;background:var(--danger-bg);color:var(--danger);font-size:14px}
 .confirm div{display:flex;gap:8px;flex-wrap:wrap}
 .ro .p-body input,.ro .p-body textarea,.ro .p-body select{pointer-events:none;opacity:.85}
 
 .toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--fg);color:var(--bg);padding:10px 16px;border-radius:12px;font-size:14px;z-index:20;box-shadow:var(--shadow);max-width:calc(100% - 32px)}
 
-@media (min-width:701px){body.panel-open .board{margin-right:min(460px,100%)}}
+@media (min-width:701px){body.panel-open .board,body.panel-open .top,body.panel-open .banner{margin-right:min(460px,100%)}}
 @media (max-width:700px){
   .canvas{display:grid;grid-template-columns:repeat(auto-fill,minmax(158px,1fr));gap:12px;padding:16px max(16px,env(safe-area-inset-right,0px)) 32px max(16px,env(safe-area-inset-left,0px));box-sizing:border-box;align-content:start}
   .tile{position:static;width:auto}
   .tile.expanded{grid-column:1/-1;width:auto}
   .t-bed{font-size:21px}
   #b-arrange{display:none}
+  #b-dlist span.lbl{display:none}
   .sizer{display:none}
   .tile{transform:none}
   .row{grid-template-columns:1fr 64px 64px}
@@ -220,6 +262,9 @@ button,input,select,textarea{font:inherit;color:inherit}
       <svg class="big" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="4"/></svg>
       <output id="size-out" for="f-size">100%</output>
     </label>
+    <button class="btn" id="b-dlist" type="button" aria-label="Discharge list">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6h11M9 12h11M9 18h11M4 6h.01M4 12h.01M4 18h.01"/></svg>
+      <span class="lbl">Discharge list</span><b class="badge" id="dl-count" title="Patients who left today">0</b></button>
     <button class="btn" id="b-arrange" aria-pressed="false" type="button">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 2v20M2 12h20M12 2l-3 3M12 2l3 3M12 22l-3-3M12 22l3-3M2 12l3-3M2 12l3 3M22 12l-3-3M22 12l-3 3"/></svg>
       <span>Move beds</span></button>
@@ -298,9 +343,21 @@ button,input,select,textarea{font:inherit;color:inherit}
     </section>
 
     <section class="sec" id="wipe-sec">
-      <div class="actions">
-        <button class="btn" id="b-clear" type="button">Patient left: clear bed</button>
-        <button class="btn danger" id="b-remove" type="button">Remove bed</button>
+      <h3>Patient leaving the ER</h3>
+      <div class="outs" id="outs">
+        <button type="button" class="o-Discharged" data-out="Discharged">Discharged</button>
+        <button type="button" class="o-Absconded" data-out="Absconded">Absconded</button>
+        <button type="button" class="o-HAMA" data-out="HAMA">HAMA</button>
+        <button type="button" class="o-Transferred" data-out="Transferred">Transferred</button>
+      </div>
+      <div class="leave" id="leave" hidden>
+        <p id="leave-text"></p>
+        <div class="inline"><label for="f-leave-time">Time left</label><input type="time" id="f-leave-time"></div>
+        <div class="actions"><button class="btn o-fill" id="leave-yes" type="button">Confirm</button><button class="btn" id="leave-no" type="button">Cancel</button></div>
+      </div>
+      <div class="minor">
+        <button class="lnk" id="b-clear" type="button">Clear bed without saving</button>
+        <button class="lnk danger" id="b-remove" type="button">Remove this bed from the board</button>
       </div>
       <div class="confirm" id="confirm" hidden>
         <span id="confirm-text"></span>
@@ -308,6 +365,20 @@ button,input,select,textarea{font:inherit;color:inherit}
       </div>
     </section>
   </div>
+</aside>
+<aside class="panel" id="dl" role="dialog" aria-labelledby="dl-title" hidden>
+  <div class="p-head"><h2 class="dl-title" id="dl-title">Discharge list</h2><button class="btn" id="dl-close" type="button">Close</button></div>
+  <div class="dl-tools">
+    <input type="search" id="dl-q" placeholder="Search name, complaint or bed" aria-label="Search discharge list" autocomplete="off">
+    <div class="dl-f" id="dl-f">
+      <button type="button" data-f="All" aria-pressed="true">All</button>
+      <button type="button" data-f="Discharged" aria-pressed="false">Discharged</button>
+      <button type="button" data-f="Absconded" aria-pressed="false">Absconded</button>
+      <button type="button" data-f="HAMA" aria-pressed="false">HAMA</button>
+      <button type="button" data-f="Transferred" aria-pressed="false">Transferred</button>
+    </div>
+  </div>
+  <div class="p-body" id="dl-body"></div>
 </aside>
 <div class="toast" id="toast" role="status" hidden></div>
 
@@ -325,6 +396,7 @@ const uid = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 
 const hhmm = ms => { const t = new Date(ms); return `${String(t.getHours()).padStart(2,'0')}:${String(t.getMinutes()).padStart(2,'0')}`; };
 function timeToMs(val, baseMs){ const [h, m] = val.split(':').map(Number); const d = new Date(baseMs || Date.now()); d.setHours(h, m, 0, 0); if (d.getTime() > Date.now() + 60000) d.setDate(d.getDate() - 1); return d.getTime(); }
 const fmtTime = ms => ms ? new Date(ms).toLocaleTimeString([], {hour:'numeric', minute:'2-digit'}) : '';
+function fmtDur(ms){ if (!(ms > 0)) return ''; const m = Math.floor(ms / 60000), h = Math.floor(m / 60); return h ? `${h}h ${String(m % 60).padStart(2,'0')}m` : `${m}m`; }
 function fmtLos(ms){ if (!ms) return ''; const m = Math.max(0, Math.floor((Date.now() - ms) / 60000)); const h = Math.floor(m / 60); return h ? `${h}h ${String(m % 60).padStart(2,'0')}m` : `${m}m`; }
 const use = n => (window.claude && window.claude.use) ? Promise.resolve(window.claude.use(n)).catch(() => null) : Promise.resolve(null);
 
@@ -336,7 +408,8 @@ const LISTS = {
 const DNOTE = { MGH:'Follow-up / advice', Admit:'Service / ward / room', Transfer:'Receiving hospital', HAMA:'Reason / waiver signed' };
 
 const S = { db:null, user:null, me:null, mode:'connecting', loaded:false, canWrite:true,
-  beds:new Map(), pending:new Map(), sent:new Map(), openId:null, arrange:false, dragging:null, confirm:null, expanded:new Set() };
+  beds:new Map(), pending:new Map(), sent:new Map(), openId:null, arrange:false, dragging:null, confirm:null, expanded:new Set(),
+  dis:new Map(), dlOpen:false, dlFilter:'All', dlQuery:'', dlExpanded:new Set(), dlConfirm:null, leave:null };
 let SC = 1; try { const z = Number(localStorage.getItem('er-size')); if (z >= 60 && z <= 150) SC = z / 100; } catch {}
 const scale = () => matchMedia('(max-width:700px)').matches ? 1 : SC;
 try { (JSON.parse(localStorage.getItem('er-expanded') || '[]')).forEach(id => S.expanded.add(id)); } catch {}
@@ -559,8 +632,18 @@ function renderPanel(){
   panel.querySelectorAll('#dispo button').forEach(b => b.setAttribute('aria-pressed', String(v.dispo === b.dataset.v)));
   $('#dnote-wrap').hidden = !v.dispo; $('#dnote-label').textContent = DNOTE[v.dispo] || 'Notes';
   $('#meds-box').hidden = v.dispo !== 'MGH';
+  const occupied = hasPatient(v), sug = {MGH:'Discharged', Transfer:'Transferred', HAMA:'HAMA'}[v.dispo];
+  panel.querySelectorAll('#outs button').forEach(b => { b.disabled = !S.canWrite || !occupied; b.classList.toggle('sug', occupied && b.dataset.out === sug); });
+  $('#b-clear').disabled = !S.canWrite || !occupied;
+  const lv = $('#leave'); lv.hidden = !S.leave;
+  if (S.leave) {
+    lv.className = 'leave o-' + S.leave.out; $('#leave-yes').className = 'btn o-fill o-' + S.leave.out;
+    $('#leave-yes').textContent = `Yes, ${S.leave.out.toLowerCase()}`;
+    $('#leave-text').textContent = `Mark ${(v.patient || {}).name || 'this patient'} in ${v.name || 'this bed'} as ${S.leave.out}? Their chart moves to the discharge list and the bed becomes empty.`;
+    const lt = $('#f-leave-time'); if (lt !== document.activeElement) lt.value = hhmm(S.leave.time);
+  }
   $('#confirm').hidden = !S.confirm;
-  if (S.confirm) $('#confirm-text').textContent = S.confirm === 'clear' ? `Clear ${v.name || 'this bed'}? The patient's details and checklists will be erased. The bed stays on the board.` : `Remove ${v.name || 'this bed'} from the board? Its chart will be erased.`;
+  if (S.confirm) $('#confirm-text').textContent = S.confirm === 'clear' ? `Clear ${v.name || 'this bed'} without saving? The patient's details will be erased and will NOT go to the discharge list.` : `Remove ${v.name || 'this bed'} from the board? Its chart will be erased.`;
   resolveNames([...uids]);
 }
 async function resolveNames(ids){
@@ -569,11 +652,14 @@ async function resolveNames(ids){
   if (!S.user || !S.user.profiles) { fill(null); return; }
   try { fill(await S.user.profiles(ids)); } catch { fill(null); }
 }
-function openPanel(id){ S.openId = id; S.confirm = null; render();
+function openPanel(id){ S.openId = id; S.confirm = null; S.leave = null; S.dlOpen = false; render();
   const el = tileEls.get(id); if (el && el.scrollIntoView) setTimeout(() => el.scrollIntoView({block:'nearest', inline:'nearest', behavior:'smooth'}), 260); }
-function closePanel(){ S.openId = null; S.confirm = null; render(); }
+function closePanel(){ S.openId = null; S.confirm = null; S.leave = null; render(); }
+function openDList(){ S.openId = null; S.confirm = null; S.leave = null; S.dlOpen = true; render(); setTimeout(() => $('#dl-q').focus(), 30); }
+function closeDList(){ S.dlOpen = false; S.dlConfirm = null; render(); }
+function closeAll(){ S.openId = null; S.confirm = null; S.leave = null; S.dlOpen = false; S.dlConfirm = null; render(); }
 
-function render(){ document.body.classList.toggle('panel-open', !!S.openId && !!view(S.openId)); renderBoard(); renderStats(); renderPanel(); setSync(); }
+function render(){ document.body.classList.toggle('panel-open', (!!S.openId && !!view(S.openId)) || S.dlOpen); renderBoard(); renderStats(); renderPanel(); renderDList(); setSync(); }
 
 /* ---------- events ---------- */
 panel.addEventListener('input', e => {
@@ -587,6 +673,7 @@ panel.addEventListener('input', e => {
 });
 panel.addEventListener('change', e => {
   const el = e.target; if (!S.openId) return;
+  if (el.id === 'f-leave-time' && el.value && S.leave) { S.leave.time = timeToMs(el.value); return; }
   if (el.id === 'f-arr' && el.value) patch(S.openId, {patient:{arrivedAt:timeToMs(el.value)}}, 0);
   if (el.id === 'f-vt' && el.value) patch(S.openId, {vitalsAt:timeToMs(el.value, view(S.openId).vitalsAt)}, 600);
   if (el.classList.contains('tedit') && el.dataset.tk && el.value) {
@@ -617,8 +704,11 @@ panel.addEventListener('click', e => {
   if (t.dataset.chip) return addItem(t.dataset.chip, t.textContent.replace(/^\+\s*/, ''));
   if (t.dataset.del) return patch(S.openId, {[t.dataset.del]:{[t.dataset.i]:null}}, 0);
   if (t.closest('#dispo')) { const v = view(S.openId); const nv = v.dispo === t.dataset.v ? '' : t.dataset.v; const p = {dispo:nv}; if (nv && !(v.patient||{}).arrivedAt) p.patient = {arrivedAt:Date.now()}; return patch(S.openId, p, 0); }
-  if (t.id === 'b-clear') { S.confirm = 'clear'; return renderPanel(); }
-  if (t.id === 'b-remove') { S.confirm = 'remove'; return renderPanel(); }
+  if (t.dataset.out) { S.confirm = null; S.leave = {out:t.dataset.out, time:Date.now()}; renderPanel(); $('#leave').scrollIntoView({block:'nearest', behavior:'smooth'}); return; }
+  if (t.id === 'leave-no') { S.leave = null; return renderPanel(); }
+  if (t.id === 'leave-yes' && S.leave) { const l = S.leave; S.leave = null; return dischargeBed(S.openId, l.out, l.time); }
+  if (t.id === 'b-clear') { S.leave = null; S.confirm = 'clear'; return renderPanel(); }
+  if (t.id === 'b-remove') { S.leave = null; S.confirm = 'remove'; return renderPanel(); }
   if (t.id === 'confirm-no') { S.confirm = null; return renderPanel(); }
   if (t.id === 'confirm-yes') {
     const id = S.openId, v = view(id), what = S.confirm; S.confirm = null;
@@ -626,18 +716,120 @@ panel.addEventListener('click', e => {
     else { closePanel(); removeBed(id); toast(`${v.name || 'Bed'} removed.`); }
   }
 });
-$('#scrim').addEventListener('click', closePanel);
+$('#scrim').addEventListener('click', closeAll);
 $('#board').addEventListener('click', e => {
-  if (!S.openId) return;
+  if (!S.openId && !S.dlOpen) return;
   const onSomething = e.composedPath().some(n => n.matches && n.matches('.tile, button, input, a, label'));
-  if (!onSomething) closePanel();
+  if (!onSomething) closeAll();
 });
 document.addEventListener('keydown', e => {
-  if (e.key === 'Escape' && S.openId) closePanel();
+  if (e.key === 'Escape' && (S.openId || S.dlOpen)) closeAll();
   if ((e.key === 'Enter' || e.key === ' ') && e.target.classList && e.target.classList.contains('tile') && !S.arrange) { e.preventDefault(); const el = e.target; if (S.expanded.has(el.dataset.id)) { S.expanded.delete(el.dataset.id); saveExpanded(); renderBoard(); } else tileTap(el, el); }
 });
 
 $('#b-add').addEventListener('click', addBed);
+
+/* ---------- discharge list ---------- */
+function cleanMap(m){ const o = {}; Object.entries(m || {}).forEach(([k, it]) => { if (it && it.t) o[k] = it; }); return o; }
+async function dischargeBed(id, out, at){
+  if (!S.canWrite) return;
+  await flush(id);
+  const v = view(id); if (!v || !hasPatient(v)) return;
+  const rec = clone({ outcome:out, at:at || Date.now(), by:S.me || null, bed:v.name || 'Bed', bedId:id,
+    chart:{ patient:v.patient || {}, vitals:v.vitals || {}, vitalsAt:v.vitalsAt || null, vitalsBy:v.vitalsBy || null,
+      dx:cleanMap(v.dx), tx:cleanMap(v.tx), meds:cleanMap(v.meds), dispo:v.dispo || '', dispoNote:v.dispoNote || '', notes:v.notes || '' } });
+  if (S.db) {
+    try { await S.db.collection('discharges').doc().set(rec); }
+    catch (e) { writeFailed(e); toast("Couldn't save to the discharge list, so the bed was not cleared. Try again."); return; }
+  } else { S.dis.set(uid(), rec); }
+  S.expanded.delete(id); saveExpanded();
+  await replaceBed(id, {name:v.name || 'Bed', x:v.x || 0, y:v.y || 0, updatedAt:Date.now()});
+  closePanel();
+  toast(`${(v.patient || {}).name || 'Patient'} marked ${out}. ${v.name || 'The bed'} is now empty.`);
+}
+async function restoreRec(rid){
+  const r = S.dis.get(rid); if (!r) return;
+  const bed = view(r.bedId);
+  if (!bed) { toast(`${r.bed} is no longer on the board.`); return; }
+  if (hasPatient(bed)) { toast(`${bed.name} has another patient now. Clear that bed first.`); return; }
+  await replaceBed(r.bedId, {...clone(r.chart), name:bed.name || r.bed, x:bed.x || 0, y:bed.y || 0, updatedAt:Date.now()});
+  await deleteRec(rid);
+  toast(`${(r.chart.patient || {}).name || 'Patient'} is back in ${bed.name}.`);
+}
+async function deleteRec(rid){
+  S.dlExpanded.delete(rid);
+  if (!S.db) { S.dis.delete(rid); render(); return; }
+  try { await S.db.collection('discharges').doc(rid).delete(); } catch (e) { writeFailed(e); }
+}
+function dayLabel(ms){
+  const d = new Date(ms), t = new Date(); const day = x => new Date(x.getFullYear(), x.getMonth(), x.getDate()).getTime();
+  const diff = Math.round((day(t) - day(d)) / 86400000);
+  return diff === 0 ? 'Today' : diff === 1 ? 'Yesterday' : d.toLocaleDateString([], {weekday:'short', month:'short', day:'numeric', year: d.getFullYear() === t.getFullYear() ? undefined : 'numeric'});
+}
+function recList(m){
+  const l = Object.values(m || {}).filter(it => it && it.t).sort((a, b) => (a.o || 0) - (b.o || 0));
+  if (!l.length) return '<div class="hint">None</div>';
+  return `<ul class="rl">${l.map(it => `<li><span class="${it.d ? 'ok' : 'no'}" aria-label="${it.d ? 'done' : 'not done'}">${it.d ? '✓' : '–'}</span><span>${esc(it.t)}${it.d ? ` <small>${esc(fmtTime(it.at))}${it.by ? ` · <span data-uid="${esc(it.by)}"></span>` : ''}</small>` : ' <small>not done</small>'}</span></li>`).join('')}</ul>`;
+}
+function recHtml(id, r){
+  const c = r.chart || {}, p = c.patient || {}, vt = c.vitals || {}, open = S.dlExpanded.has(id);
+  const ag = [p.age, p.sex].filter(Boolean).join(' · ');
+  const stay = p.arrivedAt ? fmtDur(r.at - p.arrivedAt) : '';
+  const vit = [['BP',vt.bp],['HR',vt.hr],['RR',vt.rr],['Temp',vt.temp],['SpO₂',vt.spo2 ? vt.spo2 + '%' : '']].filter(x => x[1]);
+  let h = `<div class="rec ${open ? 'open' : ''}"><button class="rec-h" type="button" data-rec="${esc(id)}" aria-expanded="${open}">
+    <span class="oc o-${esc(r.outcome)}">${esc(r.outcome)}</span><span class="rec-name">${esc(p.name || 'Unnamed')}${ag ? ` <span>${esc(ag)}</span>` : ''}</span><span class="rec-time">${esc(fmtTime(r.at))}</span>
+    <span class="rec-sub">${esc(r.bed)}${p.cc ? ' · ' + esc(p.cc) : ''}${stay ? ' · ' + stay + ' in ER' : ''}</span></button>`;
+  if (open) {
+    h += `<div class="rec-d">
+      <div class="hint">Arrived ${p.arrivedAt ? esc(fmtTime(p.arrivedAt)) : '–'} · Left ${esc(fmtTime(r.at))}${r.by ? ` · marked by <span data-uid="${esc(r.by)}"></span>` : ''}</div>
+      <h5>Vital signs${c.vitalsAt ? ` <span class="hint" style="text-transform:none;letter-spacing:0">taken ${esc(fmtTime(c.vitalsAt))}</span>` : ''}</h5>
+      <div class="mono">${vit.length ? vit.map(([k,x]) => `${k} ${esc(x)}`).join(' · ') : '<span class="hint">Not entered</span>'}</div>
+      <h5>Diagnostics</h5>${recList(c.dx)}
+      <h5>Therapeutics</h5>${recList(c.tx)}
+      <h5>Disposition</h5><div>${c.dispo ? `<b>${esc(c.dispo)}</b>${c.dispoNote ? ' · ' + esc(c.dispoNote) : ''}` : '<span class="hint">Not set</span>'}</div>
+      ${Object.keys(c.meds || {}).length ? `<h5>Take-home meds</h5>${recList(c.meds)}` : ''}
+      ${c.notes ? `<h5>Notes</h5><div style="white-space:pre-wrap">${esc(c.notes)}</div>` : ''}`;
+    if (S.canWrite) {
+      if (S.dlConfirm === id) h += `<div class="confirm" style="margin-top:10px"><span>Delete this record for good? It can't be undone.</span><div><button class="btn danger" type="button" data-rdel-yes="${esc(id)}">Delete</button><button class="btn" type="button" data-rdel-no="1">Cancel</button></div></div>`;
+      else h += `<div class="rec-act"><button class="btn" type="button" data-rback="${esc(id)}">Put back in ${esc(r.bed)}</button><button class="btn danger" type="button" data-rdel="${esc(id)}">Delete record</button></div>`;
+    }
+    h += `</div>`;
+  }
+  return h + `</div>`;
+}
+function renderDList(){
+  const today = [...S.dis.values()].filter(r => dayLabel(r.at) === 'Today').length;
+  $('#dl-count').textContent = today;
+  const dl = $('#dl');
+  if (!S.dlOpen) { dl.hidden = true; return; }
+  dl.hidden = false;
+  if (matchMedia('(max-width:700px)').matches) $('#scrim').hidden = false;
+  $('#dl-f').querySelectorAll('button').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.f === S.dlFilter)));
+  const q = S.dlQuery.trim().toLowerCase();
+  const rows = [...S.dis.entries()].filter(([, r]) => {
+    if (S.dlFilter !== 'All' && r.outcome !== S.dlFilter) return false;
+    if (!q) return true;
+    const p = (r.chart || {}).patient || {};
+    return [p.name, p.cc, r.bed, r.outcome].some(x => String(x || '').toLowerCase().includes(q));
+  }).sort((a, b) => b[1].at - a[1].at);
+  let html = '';
+  if (!rows.length) html = `<div class="dl-empty">${S.dis.size ? 'No patients match.' : 'No one has left yet. When a patient leaves, open their bed and press Discharged, Absconded, HAMA or Transferred at the bottom of the panel.'}</div>`;
+  else { let cur = null; rows.forEach(([id, r]) => { const d = dayLabel(r.at); if (d !== cur) { if (cur !== null) html += '</div>'; html += `<div class="dl-day"><h4>${esc(d)}</h4>`; cur = d; } html += recHtml(id, r); }); html += '</div>'; }
+  const body = $('#dl-body'); if (body._html !== html) { body.innerHTML = html; body._html = html; }
+  resolveNames([...body.querySelectorAll('[data-uid]')].map(e => e.dataset.uid));
+}
+$('#b-dlist').addEventListener('click', () => S.dlOpen ? closeDList() : openDList());
+$('#dl-q').addEventListener('input', e => { S.dlQuery = e.target.value; renderDList(); });
+$('#dl').addEventListener('click', e => {
+  const t = e.target.closest('button'); if (!t) return;
+  if (t.id === 'dl-close') return closeDList();
+  if (t.dataset.f) { S.dlFilter = t.dataset.f; return renderDList(); }
+  if (t.dataset.rec) { const id = t.dataset.rec; S.dlConfirm = null; if (S.dlExpanded.has(id)) S.dlExpanded.delete(id); else S.dlExpanded.add(id); return renderDList(); }
+  if (t.dataset.rback) return restoreRec(t.dataset.rback);
+  if (t.dataset.rdel) { S.dlConfirm = t.dataset.rdel; return renderDList(); }
+  if (t.dataset.rdelNo) { S.dlConfirm = null; return renderDList(); }
+  if (t.dataset.rdelYes) { S.dlConfirm = null; deleteRec(t.dataset.rdelYes); toast('Record deleted.'); }
+});
 function applySize(){ $('#canvas').style.setProperty('--s', SC); $('#f-size').value = Math.round(SC * 100); $('#size-out').textContent = Math.round(SC * 100) + '%'; }
 $('#f-size').addEventListener('input', e => { SC = Number(e.target.value) / 100; $('#canvas').classList.add('resizing'); applySize(); renderBoard(); });
 $('#f-size').addEventListener('change', () => { $('#canvas').classList.remove('resizing'); try { localStorage.setItem('er-size', Math.round(SC * 100)); } catch {} });
@@ -735,6 +927,9 @@ async function init(){
   }
   S.db = db;
   if (!S.canWrite) banner('You have view-only access to this board.', true);
+  db.collection('discharges').orderBy('at', 'desc').limit(500).onSnapshot(snap => {
+    S.dis = new Map(snap.docs.map(d => [d.id, d.data()])); renderDList(); renderStats();
+  }, () => {});
   db.collection('beds').onSnapshot(snap => {
     S.beds = new Map(snap.docs.map(d => [d.id, d.data()]));
     if (!snap.metadata.fromCache) { S.loaded = true; S.mode = 'live'; clearTimeout(loadTimer); if (S.canWrite) banner(''); }
