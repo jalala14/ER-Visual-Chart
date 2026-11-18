@@ -896,6 +896,7 @@ $('#canvas').addEventListener('click', e => {
   const el = e.target.closest('.tile'); if (!el || S.arrange) return;
   const id = el.dataset.id, v = view(id), tgt = e.target;
   if (tgt.closest('input, label')) return;
+  if (S.openId && S.openId !== id) { clearTimeout(tapTimer); tapTimer = tapId = null; return openPanel(id); }
   if (!v || !hasPatient(v) || tgt.closest('[data-act="edit"]')) { clearTimeout(tapTimer); tapTimer = tapId = null; return tileTap(el, tgt); }
   if (tapTimer && tapId === id) { clearTimeout(tapTimer); tapTimer = tapId = null; return openPanel(id); }
   clearTimeout(tapTimer); tapId = id;
