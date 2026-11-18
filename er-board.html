@@ -73,13 +73,13 @@ button,input,select,textarea{font:inherit;color:inherit}
 .state h2{font-family:var(--f-display);font-size:28px;margin:0 0 6px;color:var(--fg);text-transform:uppercase;letter-spacing:.02em}
 .state p{margin:0 0 14px;max-width:44ch}
 
-.tile{position:absolute;box-sizing:border-box;width:214px;border-radius:18px;background:var(--tile);color:var(--tile-fg);padding:12px 14px 12px;box-shadow:var(--shadow);cursor:pointer;user-select:none;-webkit-user-select:none;border:2px solid transparent;display:flex;flex-direction:column;gap:7px;text-align:left;transition:box-shadow .15s, transform .15s}
+.tile{position:absolute;box-sizing:border-box;width:214px;border-radius:18px;background:var(--tile);color:var(--tile-fg);padding:12px 14px 12px;box-shadow:var(--shadow);cursor:pointer;user-select:none;-webkit-user-select:none;border:2px solid transparent;display:flex;flex-direction:column;gap:7px;text-align:left;transition:box-shadow .15s, transform .15s, left .22s ease, top .22s ease}
 .tile:hover{background:var(--tile-hi)}
 .tile.sel{border-color:var(--fg);outline:3px solid var(--accent);outline-offset:2px}
 .tile.empty{background:color-mix(in srgb,var(--surface) 70%,transparent);color:var(--muted);border:2px dashed var(--line);box-shadow:none}
 .tile.empty:hover{border-color:var(--accent);color:var(--fg)}
 .arranging .tile{cursor:grab;touch-action:none}
-.arranging .tile.dragging{cursor:grabbing;transform:scale(1.03);box-shadow:0 18px 40px rgb(0 0 0 / .3);z-index:4}
+.arranging .tile.dragging{transition:none;cursor:grabbing;transform:scale(1.03);box-shadow:0 18px 40px rgb(0 0 0 / .3);z-index:4}
 .t-head{display:flex;align-items:center;justify-content:space-between;gap:8px;min-width:0}
 .t-bed{font-family:var(--f-display);font-weight:700;font-size:24px;line-height:1;letter-spacing:.02em;text-transform:uppercase;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0}
 .dchip{flex:none;font-family:var(--f-display);font-weight:700;font-size:14px;letter-spacing:.06em;text-transform:uppercase;padding:3px 8px;border-radius:6px;color:#fff;background:var(--c-mgh)}
@@ -406,7 +406,7 @@ function tileHtml(v){
   const pill = !all.length ? `<span class="pill none">No orders yet</span>` : todo ? `<span class="pill warn">${todo} to do</span>` : `<span class="pill ok">All done</span>`;
   const vit = [['BP',vt.bp],['HR',vt.hr],['RR',vt.rr],['T',vt.temp],['O₂',vt.spo2 ? vt.spo2 + '%' : '']].filter(x => x[1]);
   const agesex = [p.age, p.sex].filter(Boolean).join(' · ');
-  if (S.expanded.has(v._id)) return expandedHtml(v, {p, vt, dx, tx, meds, all, todo, pill, agesex});
+  if (S.expanded.has(v._id) && !S.arrange) return expandedHtml(v, {p, vt, dx, tx, meds, all, todo, pill, agesex});
   return `<div class="t-head"><span class="t-bed">${name}</span>${v.dispo ? `<span class="dchip ${esc(v.dispo)}">${esc(v.dispo)}</span>` : ''}</div>
     <div class="t-pt">${esc(p.name || 'Unnamed')}${agesex ? ` <span>${esc(agesex)}</span>` : ''}</div>
     <div class="t-cc">${esc(p.cc || '')}</div>
@@ -458,15 +458,36 @@ function renderBoard(){
     if (el._html !== html) { el.innerHTML = html; el._html = html; }
     el.classList.toggle('empty', !hasPatient(v));
     el.classList.toggle('sel', S.openId === id);
-    el.classList.toggle('expanded', S.expanded.has(id) && hasPatient(v));
+    el.classList.toggle('expanded', S.expanded.has(id) && hasPatient(v) && !S.arrange);
     el.setAttribute('aria-label', `${v.name || 'Bed'}${hasPatient(v) ? ', ' + ((v.patient||{}).name || 'patient') : ', empty'}. Open chart`);
-    if (S.dragging !== id) { el.style.left = (v.x || 0) + 'px'; el.style.top = (v.y || 0) + 'px'; }
-    maxX = Math.max(maxX, (v.x || 0)); maxY = Math.max(maxY, (v.y || 0));
     if (canvas.children[i + (S.arrange ? 1 : 0)] !== el) canvas.insertBefore(el, canvas.children[i + (S.arrange ? 1 : 0)] || null);
   });
   if (S.expanded.size) resolveNames([...canvas.querySelectorAll('.tile [data-uid]')].map(e => e.dataset.uid));
-  canvas.style.width = (maxX + (S.expanded.size ? 450 : 260)) + 'px'; canvas.style.height = (maxY + (S.expanded.size ? 900 : 320)) + 'px';
-  if (matchMedia('(max-width:700px)').matches) { canvas.style.width = ''; canvas.style.height = ''; }
+  if (matchMedia('(max-width:700px)').matches) { canvas.style.width = ''; canvas.style.height = ''; return; }
+  /* Place beds at their saved spots, then push any bed that would overlap a
+     bigger (expanded) card: same-row beds slide right, beds below slide down.
+     Saved positions are untouched; this only changes what is shown. */
+  const G = 14, rects = [], limit = Math.max(500, $('#board').clientWidth - 16);
+  ids.forEach(id => {
+    const v = view(id), el = tileEls.get(id);
+    const sx = v.x || 0, sy = v.y || 0, w = el.offsetWidth, h = el.offsetHeight;
+    let x = sx, y = sy, wrapped = false;
+    if (S.dragging === id) { x = parseFloat(el.style.left) || sx; y = parseFloat(el.style.top) || sy; }
+    else if (!S.arrange) {
+      for (let k = 0; k < 300; k++) {
+        const r = rects.find(r => x < r.x + r.w + G && x + w + G > r.x && y < r.y + r.h + G && y + h + G > r.y);
+        if (!r) break;
+        if (!wrapped && Math.abs(sy - r.sy) < 120 && sx >= r.sx) {
+          x = r.x + r.w + G;
+          if (x + w > limit && sx + w <= limit) { x = sx; y = r.y + r.h + G; wrapped = true; }
+        } else y = r.y + r.h + G;
+      }
+    }
+    if (S.dragging !== id) { el.style.left = x + 'px'; el.style.top = y + 'px'; }
+    rects.push({x, y, w, h, sx, sy});
+    maxX = Math.max(maxX, x + w); maxY = Math.max(maxY, y + h);
+  });
+  canvas.style.width = (maxX + 40) + 'px'; canvas.style.height = (maxY + 60) + 'px';
 }
 function renderStats(){
   const ids = allIds(); let occ = 0, todo = 0; const d = {MGH:0, Admit:0, Transfer:0, HAMA:0};
@@ -692,5 +713,6 @@ async function init(){
   });
 }
 init();
+if (document.fonts && document.fonts.ready) document.fonts.ready.then(() => renderBoard());
 })();
 </script>
